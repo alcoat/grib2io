@@ -67,13 +67,13 @@
 
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="sd">&quot;&quot;&quot;Tools for working with Rotated Lat/Lon Grids.&quot;&quot;&quot;</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a>
-</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a><span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a>
 </span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="n">RAD2DEG</span> <span class="o">=</span> <span class="mf">57.29577951308232087684</span>
 </span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="n">DEG2RAD</span> <span class="o">=</span> <span class="mf">0.01745329251994329576</span>
 </span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a>
-</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span>
 </span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a>    <span class="n">latin</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
 </span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>    <span class="n">lonin</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a>    <span class="n">aor</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
@@ -137,7 +137,7 @@
 </span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>    <span class="k">return</span> <span class="n">pyrot</span><span class="p">,</span> <span class="n">pxrot</span>
 </span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>
 </span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="k">def</span> <span class="nf">unrotate</span><span class="p">(</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a><span class="k">def</span><span class="w"> </span><span class="nf">unrotate</span><span class="p">(</span>
 </span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>    <span class="n">latin</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
 </span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>    <span class="n">lonin</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
 </span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="n">aor</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
@@ -254,7 +254,7 @@
 
     </div>
     <a class="headerlink" href="#rotate"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="rotate-10"><a href="#rotate-10"><span class="linenos">10</span></a><span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="rotate-10"><a href="#rotate-10"><span class="linenos">10</span></a><span class="k">def</span><span class="w"> </span><span class="nf">rotate</span><span class="p">(</span>
 </span><span id="rotate-11"><a href="#rotate-11"><span class="linenos">11</span></a>    <span class="n">latin</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
 </span><span id="rotate-12"><a href="#rotate-12"><span class="linenos">12</span></a>    <span class="n">lonin</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
 </span><span id="rotate-13"><a href="#rotate-13"><span class="linenos">13</span></a>    <span class="n">aor</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
@@ -359,7 +359,7 @@ of degrees.</li>
 
     </div>
     <a class="headerlink" href="#unrotate"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="unrotate-74"><a href="#unrotate-74"><span class="linenos"> 74</span></a><span class="k">def</span> <span class="nf">unrotate</span><span class="p">(</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="unrotate-74"><a href="#unrotate-74"><span class="linenos"> 74</span></a><span class="k">def</span><span class="w"> </span><span class="nf">unrotate</span><span class="p">(</span>
 </span><span id="unrotate-75"><a href="#unrotate-75"><span class="linenos"> 75</span></a>    <span class="n">latin</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
 </span><span id="unrotate-76"><a href="#unrotate-76"><span class="linenos"> 76</span></a>    <span class="n">lonin</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>
 </span><span id="unrotate-77"><a href="#unrotate-77"><span class="linenos"> 77</span></a>    <span class="n">aor</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">],</span>

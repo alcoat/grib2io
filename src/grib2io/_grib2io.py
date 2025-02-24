@@ -8,10 +8,24 @@ file can contain one or more GRIB2 messages.
 
 GRIB2 file IO is performed directly in Python.  The unpacking/packing of GRIB2
 integer, coded metadata and data sections is performed by the g2c library
-functions via the g2clib Cython wrapper module.  The decoding/encoding of GRIB2
-metadata is translated into more descriptive, plain language metadata by looking
-up the integer code values against the appropriate GRIB2 code tables.  These
-code tables are a part of the grib2io module.
+functions via the g2clib Cython extension module.  The decoding/encoding of GRIB2
+metadata is translated into more descriptive, plain language metadata by providing
+a mapping of the integer coded metadata to the appropriate GRIB2 code tables. The
+NCEP GRIB2 code tables are a part of the grib2io package.
+
+Interpolation
+=============
+As of grib2io VERSION, spatial interpolation via [NCEPLIPS-ip](https://github.com/NOAA-EMC/NCEPLIBS-ip)
+Fortran library is now a part of the grib2io package.  The separate component package, grib2io-interp,
+has been deprecated.  grib2io-interp provided interpolation via F2PY interface to
+NCEPLIBS-ip, which has become difficult since the 
+[removal of distutils](https://peps.python.org/pep-0632/) from Python 3.12+.
+
+NCEPLIBS-ip interpolation Fortran subroutines contain the `BIND(C)` attribute which
+provides an equivalent C-interface.  grib2io now provides a Cython-based interface, `iplib`,
+to these Fortran subroutines via their C-interface.  If NCEPLIBS-ip was built with
+OpenMP support, `iplib` will provide functions for getting and setting the number of
+OpenMP threads.
 
 Tutorials
 =========
@@ -281,25 +295,25 @@ class open():
                     # Unpack section
                     if secnum == 1:
                         # Unpack Section 1
-                        section1, grbpos = g2clib.unpack1(secmsg,grbpos,np.empty)
+                        section1, grbpos = g2clib.unpack1(secmsg)
                     elif secnum == 2:
                         # Unpack Section 2
                         section2 = self._filehandle.read(secsize-5)
                     elif secnum == 3:
                         # Unpack Section 3
-                        gds, gdt, deflist, grbpos = g2clib.unpack3(secmsg,grbpos,np.empty)
+                        gds, gdt, deflist, grbpos = g2clib.unpack3(secmsg)
                         gds = gds.tolist()
                         gdt = gdt.tolist()
                         section3 = np.concatenate((gds,gdt))
                         section3 = np.where(section3==4294967295,-1,section3)
                     elif secnum == 4:
                         # Unpack Section 4
-                        numcoord, pdt, pdtnum, coordlist, grbpos = g2clib.unpack4(secmsg,grbpos,np.empty)
+                        pdtnum, pdt, coordlist, numcoord, grbpos = g2clib.unpack4(secmsg)
                         pdt = pdt.tolist()
                         section4 = np.concatenate((np.array((numcoord,pdtnum)),pdt))
                     elif secnum == 5:
                         # Unpack Section 5
-                        drt, drtn, npts, self._pos = g2clib.unpack5(secmsg,grbpos,np.empty)
+                        drtn, drt, npts, self._pos = g2clib.unpack5(secmsg)
                         section5 = np.concatenate((np.array((npts,drtn)),drt))
                         section5 = np.where(section5==4294967295,-1,section5)
                     elif secnum == 6:
@@ -716,9 +730,9 @@ class _Grib2Message:
     def __post_init__(self):
         """Set some attributes after init."""
         self._auto_nans = _AUTO_NANS
-        self._coordlist = None
+        self._coordlist = np.zeros((0), dtype=np.float32)
         self._data = None
-        self._deflist = None
+        self._deflist = np.zeros((0), dtype=np.int64)
         self._msgnum = -1
         self._ondiskarray = None
         self._orig_section5 = np.copy(self.section5)
@@ -829,6 +843,12 @@ class _Grib2Message:
         return np.nanmedian(self.data)
 
 
+    @property
+    def shape(self):
+        """Return median value of data."""
+        return self.griddef.shape
+
+
     def __repr__(self):
         """
         Return an unambiguous string representation of the object.
@@ -899,7 +919,7 @@ class _Grib2Message:
                         [a for a in dir(self.__class__.__mro__[_find_class_index(sect)]) if not a.startswith('_')]
             else:
                 attrs = templates._section_attrs[sect]+\
-                        self.__class__.__mro__[_find_class_index(sect)]._attrs
+                        self.__class__.__mro__[_find_class_index(sect)]._attrs()
         else:
             attrs = []
         if values:
@@ -953,12 +973,6 @@ class _Grib2Message:
         else:
             bmap = None
 
-        # Prepare optional coordinate list
-        if self._coordlist is not None:
-            crdlist = np.array(self._coordlist,'f')
-        else:
-            crdlist = None
-
         # Prepare data for packing if nans are present
         fld = np.ravel(fld)
         if bitmapflag in {0,254}:
@@ -976,7 +990,7 @@ class _Grib2Message:
         # Add sections 4, 5, 6, and 7.
         self._msg,self._pos = g2clib.grib2_addfield(self._msg,self.pdtn,
                                                     self.productDefinitionTemplate,
-                                                    crdlist,
+                                                    self._coordlist,
                                                     self.drtn,
                                                     self.dataRepresentationTemplate,
                                                     fld,
@@ -1307,8 +1321,9 @@ class _Grib2Message:
             Template attributes.
         num_threads : int, optional
             Number of OpenMP threads to use for interpolation. The default
-            value is 1. If grib2io_interp was not built with OpenMP, then
-            this keyword argument and value will have no impact.
+            value is 1. If NCEPLIBS-ip and grib2io's iplib extension module
+            was not built with OpenMP, then this keyword argument and value
+            will have no impact.
 
         Returns
         -------
@@ -1563,7 +1578,7 @@ def _data(
         bmap_size,num = struct.unpack('>IB',filehandle.read(5))
         filehandle.seek(filehandle.tell()-5)
         ipos = 0
-        bmap,bmapflag = g2clib.unpack6(filehandle.read(bmap_size),msg.section3[1],ipos,np.empty)
+        bmapflag, bmap, ipos = g2clib.unpack6(filehandle.read(bmap_size), msg.section3[1])
         if bmap is not None:
             msg.bitmap = bmap.reshape((ny,nx)).astype(np.int8)
 
@@ -1579,8 +1594,8 @@ def _data(
     ipos = 0
     npvals = msg.numberOfPackedValues
     ngrdpts = msg.numberOfDataPoints
-    fld1 = g2clib.unpack7(filehandle.read(data_size),msg.gdtn,gdt,msg.drtn,drt,npvals,ipos,
-                          np.empty,storageorder=storageorder)
+    fld1, ipos = g2clib.unpack7(filehandle.read(data_size),msg.gdtn,gdt,msg.drtn,drt,npvals,
+                                storageorder=storageorder)
 
     # Handle the missing values
     if msg.bitMapFlag in {0,254}:
@@ -1605,7 +1620,7 @@ def _data(
         fld = fld1
 
     # Check for reduced grid.
-    if gds[3] > 0 and gds[4] in {0,40} and msg._deflist is not None:
+    if gds[3] > 0 and gds[4] in {0,40} and msg._deflist.shape[0] > 0: 
         from . import redtoreg
         nx = 2*ny
         lonsperlat = msg._deflist
@@ -1652,8 +1667,8 @@ def interpolate(a, method: Union[int, str], grid_def_in, grid_def_out,
     """
     This is the module-level interpolation function.
 
-    This interfaces with the grib2io_interp component package that interfaces to
-    the [NCEPLIBS-ip library](https://github.com/NOAA-EMC/NCEPLIBS-ip).
+    This interfaces with the [NCEPLIBS-ip library](https://github.com/NOAA-EMC/NCEPLIBS-ip)
+    through grib2io's internal iplib Cython extension module.
 
     Parameters
     ----------
@@ -1690,8 +1705,9 @@ def interpolate(a, method: Union[int, str], grid_def_in, grid_def_out,
         more information on how these are used.
     num_threads : int, optional
         Number of OpenMP threads to use for interpolation. The default
-        value is 1. If grib2io_interp was not built with OpenMP, then
-        this keyword argument and value will have no impact.
+        value is 1. If NCEPLIBS-ip and grib2io's iplib extension module
+        was not built with OpenMP, then this keyword argument and value
+        will have no impact.
 
     Returns
     -------
@@ -1701,15 +1717,13 @@ def interpolate(a, method: Union[int, str], grid_def_in, grid_def_out,
         the assumptions that 0-index is the interpolated u and 1-index is the
         interpolated v.
     """
-    import grib2io_interp
-    from grib2io_interp import interpolate
+
+    from . import iplib
 
     prev_num_threads = 1
     try:
-        import grib2io_interp
-        if grib2io_interp.has_openmp_support:
-            prev_num_threads = grib2io_interp.get_openmp_threads()
-            grib2io_interp.set_openmp_threads(num_threads)
+        prev_num_threads = iplib.get_openmp_threads()
+        iplib.set_openmp_threads(num_threads)
     except(AttributeError):
         pass
 
@@ -1726,69 +1740,45 @@ def interpolate(a, method: Union[int, str], grid_def_in, grid_def_out,
         if method in {3,6}:
             method_options[0:2] = -1
 
-    ni = grid_def_in.npoints
-    no = grid_def_out.npoints
+    km = 1
+    mi = grid_def_in.npoints
+    mo = grid_def_out.npoints
 
     # Adjust shape of input array(s)
     a,newshp = _adjust_array_shape_for_interp(a,grid_def_in,grid_def_out)
-
-    # Set lats and lons if stations, else create array for grids.
-    if grid_def_out.gdtn == -1:
-        rlat = np.array(grid_def_out.lats,dtype=np.float32)
-        rlon = np.array(grid_def_out.lons,dtype=np.float32)
-    else:
-        rlat = np.zeros((no),dtype=np.float32)
-        rlon = np.zeros((no),dtype=np.float32)
 
     # Call interpolation subroutines according to type of a.
     if isinstance(a,np.ndarray):
         # Scalar
         if np.any(np.isnan(a)):
-            ibi = np.zeros((a.shape[0]),dtype=np.int32)+1
-            li = np.where(np.isnan(a),0,1).astype(np.int8)
+            ibi = np.ones((km), dtype=np.int32)
+            li = np.where(np.isnan(a),0,1).astype(np.uint8)
         else:
-            ibi = np.zeros((a.shape[0]),dtype=np.int32)
-            li = np.zeros(a.shape,dtype=np.int8)
-        go = np.zeros((a.shape[0],no),dtype=np.float32)
-        no,ibo,lo,iret = interpolate.interpolate_scalar(method,method_options,
-                                                 grid_def_in.gdtn,grid_def_in.gdt,
-                                                 grid_def_out.gdtn,grid_def_out.gdt,
-                                                 ibi,li.T,a.T,go.T,rlat,rlon)
-        lo = lo.T.reshape(newshp)
-        out = go.reshape(newshp)
-        out = np.where(lo==0,np.nan,out)
+            ibi = np.zeros((km), dtype=np.int32)
+            li = np.zeros(a.shape,dtype=np.uint8)
+        no,rlat,rlon,ibo,lo,go,iret = iplib.interpolate_scalar(method, method_options,
+                                                 grid_def_in.gdtn, np.array(grid_def_in.gdt, dtype=np.int32),
+                                                 grid_def_out.gdtn, np.array(grid_def_out.gdt, dtype=np.int32),
+                                                 mi, mo, km, ibi, li, a)
+        out = np.where(lo==0,np.nan,go).reshape(newshp)
     elif isinstance(a,tuple):
         # Vector
         if np.any(np.isnan(a)):
-            ibi = np.zeros((a.shape[0]),dtype=np.int32)+1
-            li = np.where(np.isnan(a),0,1).astype(np.int8)
+            ibi = np.ones((km), dtype=np.int32)
+            li = np.where(np.isnan(a),0,1).astype(np.uint8)
         else:
-            ibi = np.zeros((a.shape[0]),dtype=np.int32)
-            li = np.zeros(a.shape,dtype=np.int8)
-        uo = np.zeros((a[0].shape[0],no),dtype=np.float32)
-        vo = np.zeros((a[1].shape[0],no),dtype=np.float32)
-        crot = np.ones((no),dtype=np.float32)
-        srot = np.zeros((no),dtype=np.float32)
-        no,ibo,lo,iret = interpolate.interpolate_vector(method,method_options,
-                                                 grid_def_in.gdtn,grid_def_in.gdt,
-                                                 grid_def_out.gdtn,grid_def_out.gdt,
-                                                 ibi,li.T,a[0].T,a[1].T,uo.T,vo.T,
-                                                 rlat,rlon,crot,srot)
-        del crot
-        del srot
-        lo = lo[:,0].reshape(newshp)
-        uo = uo.reshape(new)
-        vo = vo.reshape(new)
-        uo = np.where(lo==0,np.nan,uo)
-        vo = np.where(lo==0,np.nan,vo)
+            ibi = np.zeros((km), dtype=np.int32)
+            li = np.zeros(a[0].shape,dtype=np.uint8)
+        no,rlat,rlon,crot,srot,ibo,lo,uo,vo,iret = iplib.interpolate_vector(method, method_options,
+                                                            grid_def_in.gdtn, np.array(grid_def_in.gdt, dtype=np.int32),
+                                                            grid_def_out.gdtn, np.array(grid_def_out.gdt, dtype=np.int32),
+                                                            mi, mo, km, ibi, li, a[0], a[1])
+        uo = np.where(lo==0,np.nan,uo).reshape(newshp)
+        vo = np.where(lo==0,np.nan,vo).reshape(newshp)
         out = (uo,vo)
 
-    del rlat
-    del rlon
-
     try:
-        if grib2io_interp.has_openmp_support:
-            grib2io_interp.set_openmp_threads(prev_num_threads)
+        iplib.set_openmp_threads(prev_num_threads)
     except(AttributeError):
         pass
 
@@ -1800,9 +1790,8 @@ def interpolate_to_stations(a, method, grid_def_in, lats, lons,
     """
     Module-level interpolation function for interpolation to stations.
 
-    Interfaces with the grib2io_interp component package that interfaces to the
-    [NCEPLIBS-ip
-    library](https://github.com/NOAA-EMC/NCEPLIBS-ip). It supports scalar and
+    Interfaces with the [NCEPLIBS-ip library](https://github.com/NOAA-EMC/NCEPLIBS-ip)
+    via grib2io's iplib Cython exntension module. It supports scalar and
     vector interpolation according to the type of object a.
 
     Parameters
@@ -1842,8 +1831,9 @@ def interpolate_to_stations(a, method, grid_def_in, lats, lons,
         more information on how these are used.
     num_threads : int, optional
         Number of OpenMP threads to use for interpolation. The default
-        value is 1. If grib2io_interp was not built with OpenMP, then
-        this keyword argument and value will have no impact.
+        value is 1. If NCEPLIBS-ip and grib2io's iplib extension module
+        was not built with OpenMP, then this keyword argument and value
+        will have no impact.
 
     Returns
     -------
@@ -1853,15 +1843,12 @@ def interpolate_to_stations(a, method, grid_def_in, lats, lons,
         the assumptions that 0-index is the interpolated u and 1-index is the
         interpolated v.
     """
-    import grib2io_interp
-    from grib2io_interp import interpolate
+    from . import iplib
 
     prev_num_threads = 1
     try:
-        import grib2io_interp
-        if grib2io_interp.has_openmp_support:
-            prev_num_threads = grib2io_interp.get_openmp_threads()
-            grib2io_interp.set_openmp_threads(num_threads)
+        prev_num_threads = iplib.get_openmp_threads()
+        iplib.set_openmp_threads(num_threads)
     except(AttributeError):
         pass
 
@@ -1894,15 +1881,12 @@ def interpolate_to_stations(a, method, grid_def_in, lats, lons,
     if nlats != nlons:
         raise ValueError('Station lats and lons must be same size.')
 
-    ni = grid_def_in.npoints
-    no = nlats
+    km = 1
+    mi = grid_def_in.npoints
+    mo = nlats
 
     # Adjust shape of input array(s)
-    a,newshp = _adjust_array_shape_for_interp_stations(a,grid_def_in,no)
-
-    # Set lats and lons if stations
-    rlat = np.array(lats,dtype=np.float32)
-    rlon = np.array(lons,dtype=np.float32)
+    a,newshp = _adjust_array_shape_for_interp_stations(a,grid_def_in,mo)
 
     # Use gdtn = -1 for stations and an empty template array
     gdtn = -1
@@ -1911,37 +1895,29 @@ def interpolate_to_stations(a, method, grid_def_in, lats, lons,
     # Call interpolation subroutines according to type of a.
     if isinstance(a,np.ndarray):
         # Scalar
-        ibi = np.zeros((a.shape[0]),dtype=np.int32)
-        li = np.zeros(a.shape,dtype=np.int32)
-        go = np.zeros((a.shape[0],no),dtype=np.float32)
-        no,ibo,lo,iret = interpolate.interpolate_scalar(method,method_options,
-                                                 grid_def_in.gdtn,grid_def_in.gdt,
-                                                 gdtn,gdt,
-                                                 ibi,li.T,a.T,go.T,rlat,rlon)
+        ibi = np.zeros((km), dtype=np.int32)
+        li = np.zeros(a.shape,dtype=np.uint8)
+        no,rlat,rlon,ibo,lo,go,iret = iplib.interpolate_scalar(method, method_options,
+                                                 grid_def_in.gdtn, np.array(grid_def_in.gdt, dtype=np.int32),
+                                                 gdtn, gdt,
+                                                 mi, mo, km, ibi, li, a,
+                                                 lats=np.array(lats, dtype=np.float32),
+                                                 lons=np.array(lons, dtype=np.float32))
         out = go.reshape(newshp)
     elif isinstance(a,tuple):
         # Vector
-        ibi = np.zeros((a[0].shape[0]),dtype=np.int32)
-        li = np.zeros(a[0].shape,dtype=np.int32)
-        uo = np.zeros((a[0].shape[0],no),dtype=np.float32)
-        vo = np.zeros((a[1].shape[0],no),dtype=np.float32)
-        crot = np.ones((no),dtype=np.float32)
-        srot = np.zeros((no),dtype=np.float32)
-        no,ibo,lo,iret = interpolate.interpolate_vector(method,method_options,
-                                                 grid_def_in.gdtn,grid_def_in.gdt,
-                                                 gdtn,gdt,
-                                                 ibi,li.T,a[0].T,a[1].T,uo.T,vo.T,
-                                                 rlat,rlon,crot,srot)
-        del crot
-        del srot
+        ibi = np.zeros((km), dtype=np.int32)
+        li = np.zeros(a[0].shape,dtype=np.uint8)
+        no,rlat,rlon,crot,srot,ibo,lo,uo,vo,iret = iplib.interpolate_vector(method, method_options,
+                                                            grid_def_in.gdtn, np.array(grid_def_in.gdt, dtype=np.int32),
+                                                            gdtn, gdt,
+                                                            mi, mo, km, ibi, li, a[0], a[1],
+                                                            lats=np.array(lats, dtype=np.float32),
+                                                            lons=np.array(lons, dtype=np.float32))
         out = (uo.reshape(newshp),vo.reshape(newshp))
 
-    del rlat
-    del rlon
-
     try:
-        if grib2io_interp.has_openmp_support:
-            grib2io_interp.set_openmp_threads(prev_num_threads)
+        iplib.set_openmp_threads(prev_num_threads)
     except(AttributeError):
         pass
 
@@ -1978,7 +1954,7 @@ class Grib2GridDef:
 
     @property
     def shape(self):
-        return (self.ny, self.nx)
+        return (int(self.ny), int(self.nx))
 
 
 def _adjust_array_shape_for_interp(a, grid_def_in, grid_def_out):

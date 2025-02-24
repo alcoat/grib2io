@@ -208,7 +208,7 @@
                     <a class="variable" href="#table_4_251">table_4_251</a>
             </li>
             <li>
-                    <a class="variable" href="#table_scale_time_hours">table_scale_time_hours</a>
+                    <a class="variable" href="#table_scale_time_seconds">table_scale_time_seconds</a>
             </li>
             <li>
                     <a class="variable" href="#table_wgrib2_level_string">table_wgrib2_level_string</a>
@@ -1638,21 +1638,21 @@
 </span><span id="L-1390"><a href="#L-1390"><span class="linenos">1390</span></a><span class="s1">&#39;255&#39;</span><span class="p">:</span><span class="s1">&#39;Missing&#39;</span><span class="p">,</span>
 </span><span id="L-1391"><a href="#L-1391"><span class="linenos">1391</span></a><span class="p">}</span>
 </span><span id="L-1392"><a href="#L-1392"><span class="linenos">1392</span></a>
-</span><span id="L-1393"><a href="#L-1393"><span class="linenos">1393</span></a><span class="n">table_scale_time_hours</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="L-1393"><a href="#L-1393"><span class="linenos">1393</span></a><span class="n">table_scale_time_seconds</span> <span class="o">=</span> <span class="p">{</span>
 </span><span id="L-1394"><a href="#L-1394"><span class="linenos">1394</span></a><span class="s1">&#39;0&#39;</span><span class="p">:</span> <span class="mf">60.</span><span class="p">,</span>
-</span><span id="L-1395"><a href="#L-1395"><span class="linenos">1395</span></a><span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">,</span>
-</span><span id="L-1396"><a href="#L-1396"><span class="linenos">1396</span></a><span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">24.0</span><span class="p">),</span>
-</span><span id="L-1397"><a href="#L-1397"><span class="linenos">1397</span></a><span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="mf">720.0</span><span class="p">),</span>
-</span><span id="L-1398"><a href="#L-1398"><span class="linenos">1398</span></a><span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">365.0</span><span class="o">*</span><span class="mf">24.0</span><span class="p">)),</span>
-</span><span id="L-1399"><a href="#L-1399"><span class="linenos">1399</span></a><span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">10.0</span><span class="o">*</span><span class="mf">365.0</span><span class="o">*</span><span class="mf">24.0</span><span class="p">)),</span>
-</span><span id="L-1400"><a href="#L-1400"><span class="linenos">1400</span></a><span class="s1">&#39;6&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">30.0</span><span class="o">*</span><span class="mf">365.0</span><span class="o">*</span><span class="mf">24.0</span><span class="p">)),</span>
-</span><span id="L-1401"><a href="#L-1401"><span class="linenos">1401</span></a><span class="s1">&#39;7&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="mf">100.0</span><span class="o">*</span><span class="mf">365.0</span><span class="o">*</span><span class="mf">24.0</span><span class="p">)),</span>
+</span><span id="L-1395"><a href="#L-1395"><span class="linenos">1395</span></a><span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="mf">3600.</span><span class="p">,</span>
+</span><span id="L-1396"><a href="#L-1396"><span class="linenos">1396</span></a><span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">24.</span><span class="p">),</span>
+</span><span id="L-1397"><a href="#L-1397"><span class="linenos">1397</span></a><span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">24.</span> <span class="o">*</span> <span class="mf">30.</span><span class="p">),</span>
+</span><span id="L-1398"><a href="#L-1398"><span class="linenos">1398</span></a><span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">24.</span> <span class="o">*</span> <span class="mf">365.</span><span class="p">),</span>
+</span><span id="L-1399"><a href="#L-1399"><span class="linenos">1399</span></a><span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">24.</span> <span class="o">*</span> <span class="mf">365.</span> <span class="o">*</span> <span class="mf">10.</span><span class="p">),</span>
+</span><span id="L-1400"><a href="#L-1400"><span class="linenos">1400</span></a><span class="s1">&#39;6&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">24.</span> <span class="o">*</span> <span class="mf">365.</span> <span class="o">*</span> <span class="mf">30.</span><span class="p">),</span>
+</span><span id="L-1401"><a href="#L-1401"><span class="linenos">1401</span></a><span class="s1">&#39;7&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">24.</span> <span class="o">*</span> <span class="mf">365.</span> <span class="o">*</span> <span class="mf">100.</span><span class="p">),</span>
 </span><span id="L-1402"><a href="#L-1402"><span class="linenos">1402</span></a><span class="s1">&#39;8&#39;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">,</span>
 </span><span id="L-1403"><a href="#L-1403"><span class="linenos">1403</span></a><span class="s1">&#39;9&#39;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">,</span>
-</span><span id="L-1404"><a href="#L-1404"><span class="linenos">1404</span></a><span class="s1">&#39;10&#39;</span><span class="p">:</span> <span class="mf">3.</span><span class="p">,</span>
-</span><span id="L-1405"><a href="#L-1405"><span class="linenos">1405</span></a><span class="s1">&#39;11&#39;</span><span class="p">:</span> <span class="mf">6.</span><span class="p">,</span>
-</span><span id="L-1406"><a href="#L-1406"><span class="linenos">1406</span></a><span class="s1">&#39;12&#39;</span><span class="p">:</span> <span class="mf">12.</span><span class="p">,</span>
-</span><span id="L-1407"><a href="#L-1407"><span class="linenos">1407</span></a><span class="s1">&#39;13&#39;</span><span class="p">:</span> <span class="mf">3600.</span><span class="p">,</span>
+</span><span id="L-1404"><a href="#L-1404"><span class="linenos">1404</span></a><span class="s1">&#39;10&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">3.</span><span class="p">),</span>
+</span><span id="L-1405"><a href="#L-1405"><span class="linenos">1405</span></a><span class="s1">&#39;11&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">6.</span><span class="p">),</span>
+</span><span id="L-1406"><a href="#L-1406"><span class="linenos">1406</span></a><span class="s1">&#39;12&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="mf">3600.</span> <span class="o">*</span> <span class="mf">12.</span><span class="p">),</span>
+</span><span id="L-1407"><a href="#L-1407"><span class="linenos">1407</span></a><span class="s1">&#39;13&#39;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">,</span>
 </span><span id="L-1408"><a href="#L-1408"><span class="linenos">1408</span></a><span class="s1">&#39;14-255&#39;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">}</span>
 </span><span id="L-1409"><a href="#L-1409"><span class="linenos">1409</span></a>
 </span><span id="L-1410"><a href="#L-1410"><span class="linenos">1410</span></a><span class="c1"># ----------------------------------------------------------------------------------------</span>
@@ -2809,15 +2809,15 @@
     
 
                 </section>
-                <section id="table_scale_time_hours">
+                <section id="table_scale_time_seconds">
                     <div class="attr variable">
-            <span class="name">table_scale_time_hours</span>        =
-<input id="table_scale_time_hours-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="table_scale_time_hours-view-value"></label><span class="default_value">{&#39;0&#39;: 60.0, &#39;1&#39;: 1.0, &#39;2&#39;: 0.041666666666666664, &#39;3&#39;: 0.001388888888888889, &#39;4&#39;: 0.00011415525114155251, &#39;5&#39;: 1.1415525114155251e-05, &#39;6&#39;: 3.80517503805175e-06, &#39;7&#39;: 1.1415525114155251e-06, &#39;8&#39;: 1.0, &#39;9&#39;: 1.0, &#39;10&#39;: 3.0, &#39;11&#39;: 6.0, &#39;12&#39;: 12.0, &#39;13&#39;: 3600.0, &#39;14-255&#39;: 1.0}</span>
+            <span class="name">table_scale_time_seconds</span>        =
+<input id="table_scale_time_seconds-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+            <label class="view-value-button pdoc-button" for="table_scale_time_seconds-view-value"></label><span class="default_value">{&#39;0&#39;: 60.0, &#39;1&#39;: 3600.0, &#39;2&#39;: 86400.0, &#39;3&#39;: 2592000.0, &#39;4&#39;: 31536000.0, &#39;5&#39;: 315360000.0, &#39;6&#39;: 946080000.0, &#39;7&#39;: 3153600000.0, &#39;8&#39;: 1.0, &#39;9&#39;: 1.0, &#39;10&#39;: 10800.0, &#39;11&#39;: 21600.0, &#39;12&#39;: 43200.0, &#39;13&#39;: 1.0, &#39;14-255&#39;: 1.0}</span>
 
         
     </div>
-    <a class="headerlink" href="#table_scale_time_hours"></a>
+    <a class="headerlink" href="#table_scale_time_seconds"></a>
     
     
 
