@@ -218,10 +218,12 @@ class open():
         self.use_index = use_index
 
         if isinstance(filename, bytes):
-            raise ValueError(
-                "Invalid mode for bytes input: GRIB2 data supplied as bytes "
-                "is read-only. Use mode='r' or provide a filename instead."
-            )
+            if 'r' not in self.mode:
+                raise ValueError(
+                    "Invalid mode for bytes input: GRIB2 data supplied as bytes "
+                    "is read-only. Use mode='r' or provide a filename instead."
+                )
+
             self.current_message = 0
             if filename[:2] == _GZIP_HEADER:
                 filename = gzip.decompress(filename)
