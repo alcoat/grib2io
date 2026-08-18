@@ -315,6 +315,7 @@ if(GRIB2IO_WITH_IP)
   )
 
   if(GRIB2IO_IP_STATIC)
+    enable_language(Fortran)
     grib2io_find_library(
       IP_LIBRARY
       REQUIRED STATIC
